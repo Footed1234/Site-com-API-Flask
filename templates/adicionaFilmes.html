@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <title>Cadastrar Filmes</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            background-color: #111;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #1c1c1c;
+            padding: 30px;
+            border-radius: 12px;
+            width: 350px;
+            box-shadow: 0px 0px 15px #000;
+            border: 1px solid #333;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 6px;
+            border: none;
+            outline: none;
+            background-color: #2a2a2a;
+            color: white;
+        }
+
+        input:focus {
+            border: 2px solid #007bff;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #0063d1;
+        }
+
+        #resultado {
+            text-align: center;
+            margin-top: 12px;
+            color: #00ff9d;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Cadastrar Filme 🎬</h2>
+
+    <form id="formFilme">
+        <input type="text" id="nome" placeholder="Nome do Filme" required>
+        <input type="number" id="ano" placeholder="Ano de Lançamento" required>
+        <input type="text" id="autor" placeholder="Autor" required>
+        <input type="text" id="genero" placeholder="Gênero" required>
+        <input type="number" id="bilheteria" placeholder="Bilheteria" required>
+        <!-- REMOVIDO: Campo de avaliação fixa -->
+        <input type="text" id="imagem" placeholder="URL da imagem (opcional)">
+
+        <button type="submit">Salvar Filme</button>
+    </form>
+
+    <div id="resultado"></div>
+
+    <a href="crudFilmes.html" style="display:block; text-align:center; margin-top: 12px; color:#00bfff;">
+        ⬅ Voltar ao CRUD
+    </a>
+</div>
+
+<script>
+// Verificação de admin
+const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+if(!usuario || !usuario.isAdmin){
+    window.location.href = "index.html";
+}
+
+document.getElementById("formFilme").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    console.log("Tentando cadastrar filme..."); // Debug
+
+    const dados = {
+        nome: document.getElementById("nome").value,
+        anoLancamento: parseInt(document.getElementById("ano").value),
+        autor: document.getElementById("autor").value,
+        genero: document.getElementById("genero").value,
+        bilheteria: parseInt(document.getElementById("bilheteria").value),
+        imagem: document.getElementById("imagem").value || null
+    };
+
+    // Validação
+    if (!dados.nome || !dados.anoLancamento || !dados.autor || !dados.genero || isNaN(dados.bilheteria)) {
+        alert("Preencha todos os campos obrigatórios corretamente!");
+        return;
+    }
+
+    try {
+        console.log("Enviando dados:", dados); // Debug
+
+        const response = await fetch("http://127.0.0.1:5000/afilmes", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(dados)
+        });
+
+        console.log("Resposta recebida, status:", response.status); // Debug
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro ${response.status}: ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log("Sucesso:", data); // Debug
+
+        alert(`✅ Filme cadastrado com sucesso!\n🎬 ID: ${data.id}`);
+        document.getElementById("formFilme").reset();
+
+    } catch (error) {
+        console.error("Erro completo:", error);
+        alert(`❌ Erro ao cadastrar filme:\n${error.message}\n\nVerifique se a API está rodando na porta 5000.`);
+    }
+});
+</script>
+
+</body>
+</html>

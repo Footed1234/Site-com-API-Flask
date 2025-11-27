@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Minha Conta</title>
+
+<style>
+body {
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.containerMinhaConta {
+    width: 400px;
+    margin: 40px auto;
+    background: #1b1b1b;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #333;
+    animation: popup .3s ease;
+}
+
+@keyframes popup {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ffc107;
+}
+
+#formEditarConta label {
+    font-size: 14px;
+    margin-top: 8px;
+    display: block;
+}
+
+#formEditarConta input {
+    width: 100%;
+    background: #222;
+    border: 1px solid #333;
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+    margin-top: 5px;
+}
+
+#formEditarConta button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 12px;
+    background: #00bfff;
+}
+
+#formEditarConta button:hover {
+    opacity: .8;
+}
+
+.voltarBtn {
+    width: 100%;
+    background: #ff4c4c;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 12px;
+    font-weight: bold;
+}
+.voltarBtn:hover { opacity: .8; }
+
+.userDisplay {
+    text-align: center;
+    margin-bottom: 18px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffc107;
+}
+</style>
+
+</head>
+<body>
+
+<div class="containerMinhaConta">
+    <h1>Minha Conta</h1>
+
+    <div class="userDisplay" id="userNome"></div>
+
+    <form id="formEditarConta">
+        <label>Nome de Usuário:</label>
+        <input type="text" id="nomeUsuario">
+
+        <label>Senha:</label>
+        <input type="password" id="senhaUsuario">
+
+        <button type="submit">Salvar Alterações</button>
+    </form>
+
+    <button class="voltarBtn" onclick="window.location.href='index.html'">Cancelar</button>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const user = JSON.parse(localStorage.getItem("usuarioLogado"));
+    if(!user){
+        window.location.href = "entrar.html";
+    }
+
+    document.getElementById("userNome").textContent = "👤 " + user.nome;
+    document.getElementById("nomeUsuario").value = user.nome;
+    document.getElementById("senhaUsuario").value = user.senha;
+
+    document.getElementById("formEditarConta").addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        user.nome = document.getElementById("nomeUsuario").value;
+        user.senha = document.getElementById("senhaUsuario").value;
+
+        localStorage.setItem("usuarioLogado", JSON.stringify(user));
+
+        alert("Informações atualizadas 😎");
+        window.location.href = "index.html";
+    });
+});
+</script>
+
+</body>
+</html>

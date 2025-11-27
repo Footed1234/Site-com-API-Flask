@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Cadastrar Usuário</title>
+
+<style>
+body {
+    margin: 0;
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.box {
+    background: #1a1a1a;
+    padding: 30px;
+    width: 320px;
+    border-radius: 10px;
+    border: 1px solid #333;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ff4c4c;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    background: #262626;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background: #ff4c4c;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    color: #fff;
+    margin-top: 10px;
+}
+button:hover { opacity: .8; }
+
+a {
+    text-align: center;
+    display: block;
+    margin-top: 12px;
+    color: #00bfff;
+}
+a:hover { text-decoration: underline; }
+
+/* Botão Voltar */
+#voltar {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #ff4c4c;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+    border: 1px solid #b30000;
+}
+
+#voltar:hover {
+    background: #ff2e2e;
+    transform: scale(1.05);
+}
+</style>
+</head>
+<body>
+
+<!-- Botão Voltar -->
+<a href="entrar.html" id="voltar">⬅</a>
+
+<div class="box">
+    <h2>Cadastrar sua Conta 👤</h2>
+
+    <form id="formUsuario">
+        <input type="text" id="nome" placeholder="Nome completo" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="number" id="idade" placeholder="Idade" required>
+        <input type="password" id="senha" placeholder="Senha" required>
+
+        <button type="submit">Cadastrar</button>
+    </form>
+
+    <a href="entrar.html">⬅ Voltar para Entrar</a>
+</div>
+
+<script>
+document.getElementById("formUsuario").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    const dados = {
+        nome: document.getElementById("nome").value,
+        email: document.getElementById("email").value,
+        idade: document.getElementById("idade").value,
+        senha: document.getElementById("senha").value
+    };
+
+    try {
+        const res = await fetch("http://127.0.0.1:5000/usuarios", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(dados)
+        });
+
+        if (res.ok) {
+            const json = await res.json();
+            alert("Conta criada com sucesso! 🎉 ID: " + json.id);
+            document.getElementById("formUsuario").reset();
+        } else {
+            const erro = await res.json();
+            alert("Erro ao criar conta: " + (erro.erro || "Erro desconhecido"));
+        }
+    } catch (error) {
+        alert("Erro de conexão: " + error.message);
+    }
+});
+</script>
+
+</body>
+</html>

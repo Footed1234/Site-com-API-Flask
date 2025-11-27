@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Cadastrar Usuário</title>
+
+<style>
+
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f0f0f, #1b1b1b, #222);
+}
+
+/* Card */
+.card {
+    background: rgba(35, 35, 35, 0.9);
+    padding: 35px;
+    width: 350px;
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 20px #00000060;
+    text-align: center;
+    animation: fade 0.6s ease;
+}
+
+@keyframes fade {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.card h2 {
+    margin-bottom: 20px;
+    font-size: 26px;
+    color: #00bfff;
+}
+
+/* Inputs */
+.card input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    font-size: 15px;
+    border-radius: 6px;
+    border: none;
+    background: #2c2c2c;
+    color: #fff;
+    transition: 0.2s;
+}
+
+.card input:focus {
+    outline: none;
+    background: #333;
+    box-shadow: 0 0 6px #00bfff;
+}
+
+/* Botão */
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 12px;
+    border: none;
+    border-radius: 6px;
+    background: #00bfff;
+    color: #111;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #009cd1;
+}
+
+/* Link voltar */
+.voltar {
+    display: block;
+    margin-top: 18px;
+    color: #aaa;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.voltar:hover {
+    color: #fff;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Criar Conta 👤</h2>
+
+    <form id="formUsuario">
+        <input type="text" id="nome" placeholder="Nome completo" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="number" id="idade" placeholder="Idade" required>
+        <input type="password" id="senha" placeholder="Senha" required>
+
+        <button type="submit">Cadastrar</button>
+    </form>
+
+    <a href="crudUsuarios.html" class="voltar">⬅ Voltar</a>
+</div>
+
+<script>
+const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+if(!usuario || !usuario.isAdmin){
+    // Não é admin -> redireciona pro site normal
+    window.location.href = "index.html";
+}
+
+document.getElementById("formUsuario").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    const dados = {
+        nome: nome.value,
+        email: email.value,
+        idade: idade.value,
+        senha: senha.value
+    };
+
+    const res = await fetch("http://127.0.0.1:5000/usuarios", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(dados)
+    });
+
+    const json = await res.json();
+    alert("Conta criada com sucesso! 🎉 ID: " + json.id);
+
+    formUsuario.reset();
+});
+</script>
+
+</body>
+</html>

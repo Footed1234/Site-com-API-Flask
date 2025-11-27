@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Editar Filmes</title>
+
+<style>
+body {
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.filme-linha {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #1b1b1b;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.filme-linha:hover {
+    background: #242424;
+    border-color: #ffc107;
+}
+
+.filme-linha img {
+    width: 60px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.filme-info strong {
+    font-size: 18px;
+    color: #ffc107;
+}
+
+#modal-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(8px);
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99;
+}
+
+#formEditar {
+    background: #222;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #444;
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    animation: popup .3s ease;
+}
+
+@keyframes popup {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+input, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+}
+
+button {
+    background: #00bfff;
+    cursor: pointer;
+    font-weight: bold;
+}
+button:hover { opacity: 0.8; }
+
+a {
+    display: block;
+    text-align: center;
+    margin-top: 25px;
+    color: #00bfff;
+}
+a:hover { text-decoration: underline; }
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>Editar Filmes ✏</h1>
+
+<input type="text" id="busca" placeholder="Pesquisar por nome..." style="width:100%; padding:10px; border-radius:6px; border:none; margin-bottom:20px; background:#1a1a1a; color:#fff;">
+
+<div id="lista"></div>
+
+<div id="modal-bg">
+    <form id="formEditar">
+        <h2>Editar Filme</h2>
+
+        <input type="hidden" id="id">
+        <input id="nome" placeholder="Nome" required>
+        <input id="anoLancamento" type="number" placeholder="Ano" required>
+        <input id="autor" placeholder="Autor" required>
+        <input id="genero" placeholder="Gênero" required>
+        <input id="bilheteria" type="number" placeholder="Bilheteria" required>
+        <!-- REMOVIDO: Campo de avaliação fixa -->
+        <input id="imagem" placeholder="URL da Imagem (opcional)">
+
+        <button type="submit">Salvar Alterações</button>
+        <button type="button" onclick="fecharModal()" style="background:#ff4c4c;">Cancelar</button>
+    </form>
+</div>
+
+<a href="crudFilmes.html">⬅ Voltar ao CRUD</a>
+
+</div>
+
+<script>
+let filmes = [];
+
+async function carregarLista() {
+    const res = await fetch("http://127.0.0.1:5000/afilmes");
+    filmes = await res.json();
+    mostrarFilmes(filmes);
+}
+
+function mostrarFilmes(listaFilmes) {
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    listaFilmes.forEach(f => {
+        lista.innerHTML += `
+        <div class="filme-linha" onclick="abrirEdicao(${f.id}, '${f.nome}', ${f.anoLancamento}, '${f.autor}', '${f.genero}', ${f.bilheteria}, '${f.imagem || ""}')">
+            <img src="${f.imagem || 'https://via.placeholder.com/80x120?text=Sem+Imagem'}">
+            <div class="filme-info">
+                <strong>${f.nome}</strong><br>
+                ${f.genero} • ${f.anoLancamento}
+                <!-- REMOVIDO: ⭐ ${f.avaliacao}/10 -->
+            </div>
+        </div>`;
+    });
+}
+
+document.getElementById("busca").addEventListener("input", () => {
+    const termo = document.getElementById("busca").value.toLowerCase();
+    const filtrados = filmes.filter(f => f.nome.toLowerCase().includes(termo));
+    mostrarFilmes(filtrados);
+});
+
+function abrirEdicao(fId, fNome, fAno, fAutor, fGenero, fBilheteria, fImagem){
+    document.getElementById("id").value = fId;
+    document.getElementById("nome").value = fNome;
+    document.getElementById("anoLancamento").value = fAno;
+    document.getElementById("autor").value = fAutor;
+    document.getElementById("genero").value = fGenero;
+    document.getElementById("bilheteria").value = fBilheteria;
+    // REMOVIDO: campo de avaliação
+    document.getElementById("imagem").value = fImagem;
+
+    document.getElementById("modal-bg").style.display = "flex";
+}
+
+function fecharModal(){
+    document.getElementById("modal-bg").style.display = "none";
+}
+
+formEditar.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+
+    const dados = {
+        nome: nome.value,
+        anoLancamento: anoLancamento.value,
+        autor: autor.value,
+        genero: genero.value,
+        bilheteria: bilheteria.value,
+        // REMOVIDO: avaliacao
+        imagem: imagem.value
+    };
+
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/afilmes/${id.value}`, {
+            method: "PUT",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(dados)
+        });
+
+        if (response.ok) {
+            alert("Alterações salvas ✅");
+            fecharModal();
+            carregarLista();
+        } else {
+            const erro = await response.json();
+            alert("Erro ao salvar: " + (erro.erro || "Erro desconhecido"));
+        }
+    } catch (error) {
+        alert("Erro de conexão: " + error.message);
+    }
+});
+
+carregarLista();
+</script>
+
+</body>
+</html>

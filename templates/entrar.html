@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+
+<style>
+body {
+    margin: 0;
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.box {
+    background: #1a1a1a;
+    padding: 30px;
+    width: 320px;
+    border-radius: 10px;
+    border: 1px solid #333;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ff4c4c;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    background: #262626;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background: #ff4c4c;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    color: #fff;
+    margin-top: 10px;
+}
+button:hover { opacity: .8; }
+
+a {
+    text-align: center;
+    display: block;
+    margin-top: 12px;
+    color: #00bfff;
+}
+a:hover { text-decoration: underline; }
+
+/* Botão Voltar */
+#voltar {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #ff4c4c;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+    border: 1px solid #b30000;
+}
+
+#voltar:hover {
+    background: #ff2e2e;
+    transform: scale(1.05);
+}
+</style>
+
+</head>
+<body>
+
+<!-- Botão Voltar -->
+<a href="index.html" id="voltar">⬅</a>
+
+<div class="box">
+    <h2>Entrar</h2>
+
+    <input type="text" id="nome" placeholder="Nome de usuário">
+    <input type="password" id="senha" placeholder="Senha">
+
+    <button onclick="login()">Entrar</button>
+
+    <a href="cadastrarUsuarioUser.html">Criar Conta</a>
+</div>
+
+<script>
+async function login(){
+    const nome = document.getElementById("nome").value.trim();
+    const senha = document.getElementById("senha").value.trim();
+
+    if(!nome || !senha){
+        alert("Preencha tudo.");
+        return;
+    }
+
+    // CHECK ADMIN (hardcoded) — altere a senha aqui se quiser
+    if(nome === "Henrique Ratis" && senha === "Henrique"){
+        const adminUser = {
+            nome: "Admin",
+            senha: senha,
+            isAdmin: true
+        };
+        localStorage.setItem("usuarioLogado", JSON.stringify(adminUser));
+        // Redireciona para o painel do administrador
+        window.location.href = "admin.html";
+        return;
+    }
+
+    // Se não for Admin, verifica na API normal
+    try {
+        const res = await fetch("http://127.0.0.1:5000/usuarios");
+        const usuarios = await res.json();
+
+        const user = usuarios.find(u => u.nome === nome && u.senha === senha);
+
+        if(!user){
+            alert("Nome ou senha errados 👀");
+            return;
+        }
+
+        user.isAdmin = false; // garante flag no localStorage
+        localStorage.setItem("usuarioLogado", JSON.stringify(user));
+        window.location.href = "index.html";
+    } catch (err){
+        console.error(err);
+        alert("Erro ao conectar com o servidor.");
+    }
+}
+</script>
+
+</body>
+</html>

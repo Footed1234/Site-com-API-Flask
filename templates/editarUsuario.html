@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Editar Usuários</title>
+
+<style>
+body {
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    padding: 25px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* Barra de busca */
+#busca {
+    width: 100%;
+    padding: 12px;
+    background: #1c1c1c;
+    border: none;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+/* Lista */
+.usuario-linha {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #1b1b1b;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.usuario-linha:hover {
+    background: #2a2a1a; /* Amarelo escuro para hover */
+    border-color: #ffc107; /* Amarelo para a borda */
+}
+
+/* POP-UP */
+#popup {
+    position: fixed;
+    left:0; top:0;
+    width:100%; height:100%;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    backdrop-filter: blur(6px);
+    background: rgba(0,0,0,0.65);
+    z-index: 99;
+}
+
+.popup-box {
+    background:#1b1b1b;
+    padding:25px;
+    border-radius:8px;
+    width:350px;
+    display:flex;
+    flex-direction: column;
+    animation: popup .3s ease;
+}
+
+@keyframes popup {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.popup-box input {
+    width:100%;
+    padding:10px;
+    margin-top:7px;
+    margin-bottom:12px;
+    border:none;
+    border-radius:6px;
+    background:#2c2c2c;
+    color:#fff;
+}
+
+button {
+    padding:10px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    transition:.2s;
+    font-weight:bold;
+    margin-top:5px;
+}
+
+.salvar {
+    background:#ffc107; /* Amarelo para o botão salvar */
+    color: #111; /* Texto escuro para contraste */
+    width:100%;
+}
+.salvar:hover {
+    background:#e0a800; /* Amarelo mais escuro no hover */
+}
+
+.voltar {
+    width:100%;
+    padding:10px;
+    background:#ff4c4c;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    margin-top:5px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.2s;
+}
+.voltar:hover {
+    background:#dc3545; /* Vermelho mais escuro no hover */
+}
+
+a {
+    display: block;
+    text-align: center;
+    margin-top: 25px;
+    color: #00bfff;
+}
+a:hover { text-decoration: underline; }
+
+</style>
+</head>
+<body>
+
+<h1>Editar Usuários 👤</h1>
+
+<input type="text" id="busca" placeholder="Pesquisar usuário...">
+
+<div id="lista"></div>
+
+<!-- POPUP -->
+<div id="popup">
+    <div class="popup-box">
+        <h2>Editar Usuário</h2>
+
+        <input type="hidden" id="id">
+
+        <input id="nome" placeholder="Nome">
+        <input id="email" placeholder="Email">
+        <input id="idade" type="number" placeholder="Idade">
+        <input id="senha" type="password" placeholder="Senha">
+
+        <button class="salvar" onclick="salvar()">Salvar alterações</button>
+        <button class="voltar" onclick="fechar()">Cancelar</button>
+    </div>
+</div>
+
+<a href="crudUsuarios.html">⬅ Voltar ao CRUD</a>
+
+<script>
+let usuarios = [];
+
+async function carregarLista() {
+    const res = await fetch("http://127.0.0.1:5000/usuarios");
+    usuarios = await res.json();
+    mostrar(usuarios);
+}
+
+function mostrar(lista) {
+    const bloco = document.getElementById("lista");
+    bloco.innerHTML = "";
+
+    lista.forEach(u => {
+        bloco.innerHTML += `
+        <div class="usuario-linha" onclick="abrir(${u.id}, '${u.nome}', '${u.email}', ${u.idade}, '${u.senha}')">
+            <strong>${u.nome}</strong><br>
+            ${u.email}<br>
+            Idade: ${u.idade}
+        </div>`;
+    });
+}
+
+document.getElementById("busca").addEventListener("input", () => {
+    const termo = document.getElementById("busca").value.toLowerCase();
+    const filtrados = usuarios.filter(u => u.nome.toLowerCase().includes(termo));
+    mostrar(filtrados);
+});
+
+function abrir(idU, nomeU, emailU, idadeU, senhaU) {
+    document.getElementById("id").value = idU;
+    document.getElementById("nome").value = nomeU;
+    document.getElementById("email").value = emailU;
+    document.getElementById("idade").value = idadeU;
+    document.getElementById("senha").value = senhaU;
+
+    document.getElementById("popup").style.display = "flex";
+}
+
+function fechar() {
+    document.getElementById("popup").style.display = "none";
+}
+
+async function salvar() {
+    const idV = document.getElementById("id").value;
+
+    const dados = {
+        nome: document.getElementById("nome").value,
+        email: document.getElementById("email").value,
+        idade: document.getElementById("idade").value,
+        senha: document.getElementById("senha").value
+    };
+
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/usuarios/${idV}`, {
+            method: "PUT",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(dados)
+        });
+
+        if (response.ok) {
+            alert("Usuário atualizado ✅");
+            fechar();
+            carregarLista();
+        } else {
+            const erro = await response.json();
+            alert("Erro ao atualizar: " + (erro.erro || "Erro desconhecido"));
+        }
+    } catch (error) {
+        alert("Erro de conexão: " + error.message);
+    }
+}
+
+carregarLista();
+</script>
+
+</body>
+</html>

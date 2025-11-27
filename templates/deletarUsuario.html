@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Excluir Usuários</title>
+
+<style>
+body {
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.usuario-linha {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #1b1b1b;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.usuario-linha:hover {
+    background: #261a1a; /* Vermelho escuro para hover */
+    border-color: #ff4c4c; /* Vermelho para a borda */
+}
+
+.usuario-info strong {
+    font-size: 18px;
+    color: #ff4c4c; /* Vermelho para o nome */
+}
+
+a {
+    display: block;
+    text-align: center;
+    margin-top: 25px;
+    color: #00bfff;
+}
+a:hover { text-decoration: underline; }
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>Excluir Usuários 🗑</h1>
+
+<input type="text" id="busca" placeholder="Pesquisar por nome..."
+style="width:100%; padding:10px; border-radius:6px; border:none; margin-bottom:20px; background:#1a1a1a; color:#fff;">
+
+<div id="lista"></div>
+
+<a href="crudUsuarios.html">⬅ Voltar ao CRUD</a>
+
+</div>
+
+<script>
+let usuarios = [];
+
+async function carregarLista() {
+    const res = await fetch("http://127.0.0.1:5000/usuarios");
+    usuarios = await res.json();
+    mostrarUsuarios(usuarios);
+}
+
+function mostrarUsuarios(listaUsuarios) {
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    listaUsuarios.forEach(u => {
+        lista.innerHTML += `
+        <div class="usuario-linha" onclick="confirmarExclusao(${u.id}, '${u.nome}')">
+            <div class="usuario-info">
+                <strong>${u.nome}</strong><br>
+                Email: ${u.email}<br>
+                Idade: ${u.idade}
+            </div>
+        </div>`;
+    });
+}
+
+document.getElementById("busca").addEventListener("input", () => {
+    const termo = document.getElementById("busca").value.toLowerCase();
+    const filtrados = usuarios.filter(u => u.nome.toLowerCase().includes(termo));
+    mostrarUsuarios(filtrados);
+});
+
+async function confirmarExclusao(id, nome) {
+    if (!confirm(`Tem certeza que quer excluir o usuário: "${nome}"? 🗑`)) return;
+
+    try {
+        const r = await fetch(`http://127.0.0.1:5000/usuarios/${id}`, { method: "DELETE" });
+        const res = await r.json();
+
+        if (r.ok) {
+            alert(res.status || "Usuário excluído com sucesso!");
+            carregarLista();
+        } else {
+            alert("Erro: " + (res.erro || "Erro desconhecido"));
+        }
+    } catch (error) {
+        alert("Erro de conexão: " + error.message);
+    }
+}
+
+carregarLista();
+</script>
+
+</body>
+</html>

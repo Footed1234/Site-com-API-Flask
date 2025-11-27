@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Lançamentos</title>
+
+<style>
+body {
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* Container de filtros */
+.filtros-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+#busca {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    background: #1a1a1a;
+    color: #fff;
+}
+
+#filtro-genero {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    background: #1a1a1a;
+    color: #fff;
+    cursor: pointer;
+}
+
+#filtro-genero option {
+    background: #1a1a1a;
+    color: #fff;
+}
+
+.filme-linha {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #1b1b1b;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: 0.5s;
+    transform: scale(1);
+}
+
+.filme-linha:hover {
+    background: linear-gradient(90deg, #1f1f1f, #292929);
+    border-color: #ffc107;
+    transform: scale(1.03);
+    box-shadow: 0 0 8px #ffc10755;
+}
+
+.filme-linha img {
+    width: 55px;
+    height: 85px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.filme-info strong {
+    font-size: 18px;
+    color: #ffc107;
+}
+
+.genero-tag {
+    display: inline-block;
+    background: #ff4c4c;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+/* Botão Voltar */
+#voltar {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #ff4c4c;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+    border: 1px solid #b30000;
+}
+#voltar:hover {
+    background: #ff2e2e;
+    transform: scale(1.05);
+}
+
+/* --- MODAL ESTILO POP-UP COM BLUR --- */
+#modal-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(8px);
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+#modal {
+    background: #1b1b1b;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #333;
+    width: 500px;
+    max-width: 90vw;
+    animation: pop .3s ease;
+}
+
+@keyframes pop {
+    from { transform: scale(0.8); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+.modal-content {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+#modal-img {
+    width: 160px;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.info {
+    font-size: 16px;
+    line-height: 1.45;
+    flex: 1;
+}
+
+.minha-avaliacao {
+    background: #2a2a2a;
+    padding: 10px;
+    border-radius: 6px;
+    margin: 10px 0;
+    border-left: 4px solid #00bfff;
+}
+
+.minha-avaliacao p {
+    margin: 5px 0;
+    color: #00bfff;
+}
+
+.avaliacao-section {
+    background: #222;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    margin-top: 15px;
+}
+
+.avaliacao-section h3 {
+    margin-top: 0;
+    color: #ffc107;
+}
+
+.avaliacao-input {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.avaliacao-input input {
+    width: 80px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #2a2a2a;
+    color: white;
+    text-align: center;
+}
+
+.avaliacao-input button {
+    padding: 8px 15px;
+    background: #00bfff;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.avaliacao-input button:hover {
+    background: #009cd1;
+}
+
+#fechar {
+    background: #ff4c4c;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+    color: white;
+}
+#fechar:hover { opacity: .8; }
+
+/* Contador de resultados */
+.resultados-info {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #ccc;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filtros-container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+</head>
+<body>
+
+<a href="index.html" id="voltar">⬅</a>
+
+<div class="container">
+    <h1>Lançamentos 2024 - 2025 🚀</h1>
+
+    <!-- Filtros -->
+    <div class="filtros-container">
+        <input type="text" id="busca" placeholder="Pesquisar por nome...">
+        <select id="filtro-genero">
+            <option value="">Todos os Gêneros</option>
+            <!-- Os gêneros serão preenchidos dinamicamente -->
+        </select>
+    </div>
+
+    <div class="resultados-info" id="resultados-info">
+        Carregando lançamentos...
+    </div>
+
+    <div id="lista"></div>
+</div>
+
+<!-- Modal com Sistema de Avaliação -->
+<div id="modal-bg">
+    <div id="modal">
+        <div class="modal-content">
+            <img id="modal-img">
+            <div class="info">
+                <p><strong>Nome:</strong> <span id="m-nome"></span></p>
+                <p><strong>Ano de lançamento:</strong> <span id="m-ano"></span></p>
+                <p><strong>Autor:</strong> <span id="m-autor"></span></p>
+                <p><strong>Gênero:</strong> <span id="m-genero"></span></p>
+                <p><strong>Bilheteria:</strong> R$ <span id="m-bilheteria"></span></p>
+
+                <!-- Seção da própria avaliação -->
+                <div id="minha-avaliacao-container" style="display: none;">
+                    <div class="minha-avaliacao">
+                        <p><strong>⭐ Sua Avaliação:</strong> <span id="minha-nota"></span>/10</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="avaliacao-section">
+            <h3>Sua Avaliação</h3>
+            <div class="avaliacao-input">
+                <input type="number" id="nota-usuario" min="0" max="10" placeholder="0-10">
+                <button onclick="avaliarFilme()">Avaliar</button>
+            </div>
+            <div id="avaliacao-status"></div>
+        </div>
+
+        <button id="fechar" onclick="fecharModal()">Fechar</button>
+    </div>
+</div>
+
+<script>
+let filmes = [];
+let filmeAtualId = null;
+let generosUnicos = new Set();
+
+async function carregarLista() {
+    try {
+        const res = await fetch("http://127.0.0.1:5000/afilmes");
+        const todos = await res.json();
+
+        // Filtrando só 2024 e 2025
+        filmes = todos.filter(f => f.anoLancamento == 2024 || f.anoLancamento == 2025);
+
+        // Extrair gêneros únicos dos lançamentos
+        extrairGeneros();
+
+        // Preencher dropdown de gêneros
+        preencherDropdownGeneros();
+
+        mostrarFilmes(filmes);
+        atualizarContador(filmes.length);
+    } catch (error) {
+        console.error("Erro ao carregar lançamentos:", error);
+        document.getElementById("resultados-info").textContent = "Erro ao carregar lançamentos";
+    }
+}
+
+function extrairGeneros() {
+    generosUnicos.clear();
+    filmes.forEach(f => {
+        if (f.genero && f.genero.trim() !== "") {
+            generosUnicos.add(f.genero.trim());
+        }
+    });
+}
+
+function preencherDropdownGeneros() {
+    const select = document.getElementById("filtro-genero");
+
+    // Manter a opção "Todos os Gêneros" e adicionar os novos
+    const options = ['<option value="">Todos os Gêneros</option>'];
+
+    // Ordenar gêneros alfabeticamente
+    const generosOrdenados = Array.from(generosUnicos).sort();
+
+    generosOrdenados.forEach(genero => {
+        options.push(`<option value="${genero}">${genero}</option>`);
+    });
+
+    select.innerHTML = options.join('');
+}
+
+function mostrarFilmes(listaFilmes) {
+    const lista = document.getElementById("lista");
+
+    if (listaFilmes.length === 0) {
+        lista.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #888;">
+                <p>Nenhum lançamento encontrado com os filtros aplicados.</p>
+                <p>Tente alterar os critérios de busca.</p>
+            </div>
+        `;
+        return;
+    }
+
+    lista.innerHTML = "";
+
+    listaFilmes.forEach(f => {
+        lista.innerHTML += `
+        <div class="filme-linha" onclick="abrirModal(${f.id})">
+            <img src="${f.imagem || 'https://via.placeholder.com/80x120?text=Sem+Imagem'}">
+            <div class="filme-info">
+                <strong>${f.nome}</strong>
+                <span class="genero-tag">${f.genero}</span><br>
+                ${f.anoLancamento} • ${f.autor}
+            </div>
+        </div>`;
+    });
+}
+
+function atualizarContador(total) {
+    const busca = document.getElementById("busca").value;
+    const genero = document.getElementById("filtro-genero").value;
+
+    let texto = `${total} lançamento${total !== 1 ? 's' : ''} encontrado${total !== 1 ? 's' : ''}`;
+
+    if (busca) {
+        texto += ` para "${busca}"`;
+    }
+
+    if (genero) {
+        texto += busca ? ` no gênero ${genero}` : ` no gênero ${genero}`;
+    }
+
+    document.getElementById("resultados-info").textContent = texto;
+}
+
+function filtrarFilmes() {
+    const termoBusca = document.getElementById("busca").value.toLowerCase();
+    const generoSelecionado = document.getElementById("filtro-genero").value;
+
+    let filtrados = filmes;
+
+    // Filtro por nome
+    if (termoBusca) {
+        filtrados = filtrados.filter(f =>
+            f.nome.toLowerCase().includes(termoBusca)
+        );
+    }
+
+    // Filtro por gênero
+    if (generoSelecionado) {
+        filtrados = filtrados.filter(f =>
+            f.genero === generoSelecionado
+        );
+    }
+
+    mostrarFilmes(filtrados);
+    atualizarContador(filtrados.length);
+}
+
+async function abrirModal(id){
+    const f = filmes.find(x => x.id === id);
+    if (!f) return;
+
+    filmeAtualId = id;
+
+    // Preencher informações do filme
+    document.getElementById("modal-img").src = f.imagem || "https://via.placeholder.com/200x300?text=Sem+Imagem";
+    document.getElementById("m-nome").textContent = f.nome;
+    document.getElementById("m-ano").textContent = f.anoLancamento;
+    document.getElementById("m-autor").textContent = f.autor;
+    document.getElementById("m-genero").textContent = f.genero;
+    document.getElementById("m-bilheteria").textContent = Number(f.bilheteria).toLocaleString("pt-BR");
+
+    // Verificar se usuário já avaliou este filme
+    await carregarMinhaAvaliacao(id);
+
+    document.getElementById("modal-bg").style.display = "flex";
+}
+
+async function carregarMinhaAvaliacao(filmeId) {
+    const user = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+    // Verificar se usuário está logado
+    if (!user) {
+        // Usuário NÃO logado - esconder completamente a seção de avaliação
+        document.getElementById("minha-avaliacao-container").style.display = "none";
+        document.querySelector(".avaliacao-section").style.display = "none";
+        return;
+    }
+
+    // Usuário LOGADO - SEMPRE mostrar a seção de avaliação
+    document.querySelector(".avaliacao-section").style.display = "block";
+
+    try {
+        // Buscar avaliações do usuário
+        const res = await fetch(`http://127.0.0.1:5000/minha-avaliacao/${user.id}/${filmeId}`);
+        const data = await res.json();
+
+        if (res.ok && data.avaliacao) {
+            // Usuário já avaliou este filme
+            document.getElementById("minha-nota").textContent = data.avaliacao.nota;
+            document.getElementById("minha-avaliacao-container").style.display = "block";
+            document.getElementById("nota-usuario").value = data.avaliacao.nota;
+            document.getElementById("avaliacao-status").innerHTML =
+                `<p style="color: #00bfff;">Você já avaliou este filme. Digite uma nova nota para atualizar.</p>`;
+        } else {
+            // Usuário ainda não avaliou este filme
+            document.getElementById("minha-avaliacao-container").style.display = "none";
+            document.getElementById("nota-usuario").value = "";
+            document.getElementById("avaliacao-status").innerHTML =
+                `<p style="color: #00bfff;">Seja o primeiro a avaliar este filme!</p>`;
+        }
+
+    } catch (error) {
+        console.error("Erro ao carregar avaliação:", error);
+        document.getElementById("minha-avaliacao-container").style.display = "none";
+        document.getElementById("avaliacao-status").innerHTML =
+            `<p style="color: #ff4c4c;">Erro ao carregar avaliação</p>`;
+    }
+}
+
+function fecharModal(){
+    document.getElementById("modal-bg").style.display = "none";
+    filmeAtualId = null;
+}
+
+async function avaliarFilme() {
+    const user = JSON.parse(localStorage.getItem("usuarioLogado"));
+    if (!user) {
+        alert("Faça login para avaliar!");
+        return;
+    }
+
+    if (!filmeAtualId) {
+        alert("Nenhum filme selecionado!");
+        return;
+    }
+
+    const notaInput = document.getElementById("nota-usuario");
+    const nota = parseInt(notaInput.value);
+
+    if (nota < 0 || nota > 10 || isNaN(nota)) {
+        alert("Digite uma nota entre 0 e 10!");
+        return;
+    }
+
+    const dados = {
+        idUsuario: user.id,
+        idFilme: filmeAtualId,
+        nota: nota
+    };
+
+    try {
+        const res = await fetch("http://127.0.0.1:5000/avaliar", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(dados)
+        });
+
+        const resultado = await res.json();
+
+        if (res.ok) {
+            document.getElementById("avaliacao-status").innerHTML =
+                `<p style="color: #00ff9d;">✅ ${resultado.status}</p>`;
+
+            // Atualizar a exibição da própria avaliação
+            document.getElementById("minha-nota").textContent = nota;
+            document.getElementById("minha-avaliacao-container").style.display = "block";
+
+        } else {
+            document.getElementById("avaliacao-status").innerHTML =
+                `<p style="color: #ff4c4c;">❌ ${resultado.erro}</p>`;
+        }
+    } catch (error) {
+        document.getElementById("avaliacao-status").innerHTML =
+            `<p style="color: #ff4c4c;">❌ Erro de conexão</p>`;
+        console.error("Erro:", error);
+    }
+}
+
+// Event Listeners para os filtros
+document.getElementById("busca").addEventListener("input", filtrarFilmes);
+document.getElementById("filtro-genero").addEventListener("change", filtrarFilmes);
+
+// Fechar modal ao clicar fora
+document.getElementById("modal-bg").addEventListener("click", function(e) {
+    if (e.target.id === "modal-bg") {
+        fecharModal();
+    }
+});
+
+carregarLista();
+</script>
+
+</body>
+</html>

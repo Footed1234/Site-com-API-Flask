@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>CRUD de Usuários</title>
+
+<style>
+body {
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+}
+
+button {
+    width: 250px;
+    padding: 15px;
+    margin: 12px 0;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.add   { background: #00bfff; }   /* Azul */
+.edit  { background: #ffc107; }   /* Amarelo */
+.list  { background: #28a745; }   /* Verde */
+.del   { background: #dc3545; }   /* Vermelho */
+.voltar { background: #444; color: #fff; }
+
+button:hover { opacity: 0.8; }
+
+h1 {
+    margin-bottom: 25px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>CRUD de Usuários 👤</h1>
+
+    <a href="cadastrarUsuario.html"><button class="add">Adicionar Usuário</button></a>
+    <a href="editarUsuario.html"><button class="edit">Editar Usuário</button></a>
+    <a href="listarUsuario.html"><button class="list">Listar Usuários</button></a>
+    <a href="deletarUsuario.html"><button class="del">Deletar Usuário</button></a>
+    <a href="admin.html"><button class="voltar">Voltar à Página Admin</button></a>
+</div>
+
+<script>
+const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+if(!usuario || usuario.nome.toLowerCase() !== "admin"){
+    // Não é admin -> redireciona pro site normal
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>

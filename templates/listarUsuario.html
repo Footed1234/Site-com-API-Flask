@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Lista de Usuários</title>
+
+<style>
+body {
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+#busca {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    margin-bottom: 20px;
+    background: #1a1a1a;
+    color: #fff;
+}
+
+.usuario-linha {
+    background: #1b1b1b;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.usuario-linha:hover {
+    background: #1a2a1a; /* Verde escuro para hover */
+    border-color: #28a745; /* Verde para a borda */
+}
+
+.usuario-info strong {
+    font-size: 18px;
+    color: #28a745; /* Verde para o nome */
+}
+
+/* --- MODAL ESTILO POP-UP COM BLUR --- */
+#modal-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(8px);
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+#modal {
+    background: #1b1b1b;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #333;
+    animation: pop .3s ease;
+    width: 350px;
+}
+
+@keyframes pop {
+    from { transform: scale(0.8); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+#modal .info {
+    font-size: 16px;
+    line-height: 1.45;
+}
+
+#fechar {
+    background: #ff4c4c;
+    padding: 10px;
+    margin-top: 15px;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+}
+#fechar:hover {
+    background: #dc3545; /* Vermelho mais escuro no hover */
+}
+
+a {
+    display: block;
+    text-align: center;
+    color: #00bfff;
+    margin-top: 25px;
+}
+a:hover { text-decoration: underline; }
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>Lista de Usuários 👤</h1>
+
+<input type="text" id="busca" placeholder="Pesquisar usuário...">
+
+<div id="lista"></div>
+
+<a href="crudUsuarios.html">⬅ Voltar ao CRUD</a>
+
+</div>
+
+<!-- Modal -->
+<div id="modal-bg">
+    <div id="modal">
+        <div class="info">
+            <p><strong>Nome:</strong> <span id="m-nome"></span></p>
+            <p><strong>Email:</strong> <span id="m-email"></span></p>
+            <p><strong>Idade:</strong> <span id="m-idade"></span></p>
+            <p><strong>Senha:</strong> <span id="m-senha"></span></p>
+
+            <button id="fechar" onclick="fecharModal()">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let usuarios = [];
+
+async function carregarLista() {
+    const res = await fetch("http://127.0.0.1:5000/usuarios");
+    usuarios = await res.json();
+    mostrarUsuarios(usuarios);
+}
+
+function mostrarUsuarios(lista) {
+    const listaDiv = document.getElementById("lista");
+    listaDiv.innerHTML = "";
+
+    lista.forEach(u => {
+        listaDiv.innerHTML += `
+        <div class="usuario-linha" onclick="abrirModal(${u.id})">
+            <div class="usuario-info">
+                <strong>${u.nome}</strong><br>
+                ${u.email}<br>
+                Idade: ${u.idade}
+            </div>
+        </div>`;
+    });
+}
+
+function abrirModal(id){
+    const u = usuarios.find(x => x.id === id);
+
+    document.getElementById("m-nome").innerText = u.nome;
+    document.getElementById("m-email").innerText = u.email;
+    document.getElementById("m-idade").innerText = u.idade;
+    document.getElementById("m-senha").innerText = u.senha;
+
+    document.getElementById("modal-bg").style.display = "flex";
+}
+
+function fecharModal(){
+    document.getElementById("modal-bg").style.display = "none";
+}
+
+document.getElementById("busca").addEventListener("input", () => {
+    const termo = document.getElementById("busca").value.toLowerCase();
+    const filtrados = usuarios.filter(u => u.nome.toLowerCase().includes(termo));
+    mostrarUsuarios(filtrados);
+});
+
+carregarLista();
+</script>
+
+</body>
+</html>

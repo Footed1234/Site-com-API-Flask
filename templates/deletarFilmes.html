@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Excluir Filmes</title>
+
+<style>
+body {
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.filme-linha {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #1b1b1b;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.filme-linha:hover {
+    background: #261a1a;
+    border-color: #ff4c4c;
+}
+
+.filme-linha img {
+    width: 60px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.filme-info strong {
+    font-size: 18px;
+    color: #ff4c4c;
+}
+
+a {
+    display: block;
+    text-align: center;
+    margin-top: 25px;
+    color: #00bfff;
+}
+a:hover { text-decoration: underline; }
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>Excluir Filmes 🗑</h1>
+
+<input type="text" id="busca" placeholder="Pesquisar por nome..."
+style="width:100%; padding:10px; border-radius:6px; border:none; margin-bottom:20px; background:#1a1a1a; color:#fff;">
+
+<div id="lista"></div>
+
+<a href="crudFilmes.html">⬅ Voltar ao CRUD</a>
+
+</div>
+
+<script>
+let filmes = [];
+
+async function carregarLista() {
+    const res = await fetch("http://127.0.0.1:5000/afilmes");
+    filmes = await res.json();
+    mostrarFilmes(filmes);
+}
+
+function mostrarFilmes(listaFilmes) {
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    listaFilmes.forEach(f => {
+        lista.innerHTML += `
+        <div class="filme-linha" onclick="confirmarExclusao(${f.id}, '${f.nome}')">
+            <img src="${f.imagem || 'https://via.placeholder.com/80x120?text=Sem+Imagem'}">
+            <div class="filme-info">
+                <strong>${f.nome}</strong><br>
+                ${f.genero} • ${f.anoLancamento}
+                <!-- REMOVIDO: ⭐ ${f.avaliacao}/10 -->
+            </div>
+        </div>`;
+    });
+}
+
+document.getElementById("busca").addEventListener("input", () => {
+    const termo = document.getElementById("busca").value.toLowerCase();
+    const filtrados = filmes.filter(f => f.nome.toLowerCase().includes(termo));
+    mostrarFilmes(filtrados);
+});
+
+async function confirmarExclusao(id, nome) {
+    if (!confirm(`Tem certeza que quer excluir o filme: "${nome}"? 🗑`)) return;
+
+    try {
+        const r = await fetch(`http://127.0.0.1:5000/afilmes/${id}`, { method: "DELETE" });
+        const res = await r.json();
+
+        if (r.ok) {
+            alert(res.status || "Filme excluído com sucesso!");
+            carregarLista(); // atualiza a lista ali no ato
+        } else {
+            alert("Erro: " + (res.erro || "Erro desconhecido"));
+        }
+    } catch (error) {
+        alert("Erro de conexão: " + error.message);
+    }
+}
+
+carregarLista();
+</script>
+
+</body>
+</html>
